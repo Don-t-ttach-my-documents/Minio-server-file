@@ -1,0 +1,44 @@
+openapi: 3.0.1
+info:
+  title: Serve File
+  description: Serve File
+  version: 1.0.0
+paths:
+  /upload:
+    post:
+      summary: Allow to upload
+      responses:
+        '200':
+          description: List of uploaded urls
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  example: "http://localhost:3200/file/a.jpg?sender=a@a.fr&token=aaa"
+        # TODO: include error responses
+  /file/{file_name}:
+    get:
+      summary: Retrieve uploaded files
+      parameters:
+        - in: query
+          name: file_name
+          required: true
+          schema:
+            type: string
+            example: "a.jpg"
+        - in: query
+          name: token
+          required: true
+          schema:
+            type: string
+            example: "123456"
+      responses:
+        '200':
+          description: File founded and downloaded
+
+
+
+            
+  

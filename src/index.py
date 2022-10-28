@@ -64,13 +64,13 @@ def get(file_name):
         infos = jwt.decode(token, SECRET, algorithms=["HS256"])
     except Exception as err:
         print(err)
-        return make_response(jsonify({"error": "Wrong token"}))
+        return make_response(jsonify({"error": "Wrong token"}), 400)
     file_url = "http://localhost:9000/"+BUCKET_NAME+"/"+email+"/"+filename+"?"+infos["query"]
     file = requests.get(file_url)
     if file.status_code == 200:
-        return Response(file.content, mimetype=file.headers.get("Content-Type"))
+        return Response(file.content, mimetype=file.headers.get("Content-Type"), status=200)
     else:
-        return make_response(jsonify({"error": "Unable to retrieve the file"}))
+        return make_response(jsonify({"error": "Unable to retrieve the file"}), 404)
 
 
 if __name__ == "__main__":
