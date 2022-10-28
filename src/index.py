@@ -9,23 +9,25 @@ from minio import Minio
 BUCKET_NAME = "don-t-ttach-my-docs"
 SECRET = "secret"
 MINIO_HOST = "minio:9000"
+MINIO_ACCESS_KEY = "remi_czn"
+MINIO_SECRET_KEY = "password"
 
-client = Minio(MINIO_HOST, access_key="remi_czn", secret_key="password", secure=False)
+client = Minio(MINIO_HOST, access_key=MINIO_ACCESS_KEY, secret_key=MINIO_SECRET_KEY, secure=False)
 
 
 def upload_to_minio(file, email):
     check_bucket_exists()
 
     size = os.fstat(file.fileno()).st_size
-    client.put_object(BUCKET_NAME, email + "/" + file.filename, file, size)
+    client.put_object(BUCKET_NAME, f"{email}/{file.filename}", file, size)
     return build_url(email, file.filename)
 
 
 def build_url(email, filename):
-    url = client.presigned_get_object(BUCKET_NAME, email + "/" + filename)
+    url = client.presigned_get_object(BUCKET_NAME, f"{email}/{filename}")
     query = str(urlparse(url).query)
     token = jwt.encode({"query": query}, SECRET, algorithm="HS256")
-    res_url = "/file/" + filename + "?sender=" + email + "&token=" + token
+    res_url = f"/file/{filename}?sender={email}&token={token}"
     return res_url
 
 
@@ -49,7 +51,7 @@ def upload():
     for file in request.files.getlist("file"):
         url = upload_to_minio(file, request.form["email"])
         res.append(url)
-    return make_response(res)
+    return make_response(res, 200)
 
 
 @app.route("/file/<file_name>", methods=["GET"])
@@ -65,7 +67,7 @@ def get(file_name):
     except Exception as err:
         print(err)
         return make_response(jsonify({"error": "Wrong token"}), 400)
-    file_url = MINIO_HOST + "/" + BUCKET_NAME + "/" + email + "/" + filename + "?" + infos["query"]
+    file_url = f"{MINIO_HOST}/{BUCKET_NAME}/{email}/{filename}?{infos['query']}"
     file = requests.get(file_url)
     if file.status_code == 200:
         return Response(file.content, mimetype=file.headers.get("Content-Type"), status=200)
