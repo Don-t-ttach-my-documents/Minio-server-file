@@ -12,6 +12,10 @@ services:
       MINIO_ROOT_USER: remi_czn
       MINIO_ROOT_PASSWORD: password
     command: server --console-address ":9001" /data
+  api:
+    build: .
+    ports:
+      - "3200:3200"
 
 volumes:
-  minio_storage: {}
+  minio_storage: { }

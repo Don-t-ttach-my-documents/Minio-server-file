@@ -1,16 +1,16 @@
 import os
+from urllib.parse import urlparse
 
 import jwt
 import requests
-
 from flask import Flask, request, make_response, jsonify, Response
 from minio import Minio
-from urllib.parse import urlparse
 
 BUCKET_NAME = "don-t-ttach-my-docs"
 SECRET = "secret"
+MINIO_HOST = "minio:9000"
 
-client = Minio("localhost:9000", access_key="remi_czn", secret_key="password", secure=False)
+client = Minio(MINIO_HOST, access_key="remi_czn", secret_key="password", secure=False)
 
 
 def upload_to_minio(file, email):
@@ -65,7 +65,7 @@ def get(file_name):
     except Exception as err:
         print(err)
         return make_response(jsonify({"error": "Wrong token"}), 400)
-    file_url = "http://localhost:9000/"+BUCKET_NAME+"/"+email+"/"+filename+"?"+infos["query"]
+    file_url = MINIO_HOST + "/" + BUCKET_NAME + "/" + email + "/" + filename + "?" + infos["query"]
     file = requests.get(file_url)
     if file.status_code == 200:
         return Response(file.content, mimetype=file.headers.get("Content-Type"), status=200)
