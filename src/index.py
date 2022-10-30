@@ -67,7 +67,7 @@ def get(file_name):
     except Exception as err:
         print(err)
         return make_response(jsonify({"error": "Wrong token"}), 400)
-    file_url = f"{MINIO_HOST}/{BUCKET_NAME}/{email}/{filename}?{infos['query']}"
+    file_url = f"http://{MINIO_HOST}/{BUCKET_NAME}/{email}/{filename}?{infos['query']}"
     file = requests.get(file_url)
     if file.status_code == 200:
         return Response(file.content, mimetype=file.headers.get("Content-Type"), status=200)
